@@ -21,12 +21,34 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
   html, body { height: 100%; }
   body {
-    background: #D3DAE6;
+    background: #07090E;
     font-family: -apple-system, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
+  body.embedded { background: transparent; }
   #scaler { transform-origin: center center; }
+  #lockscreen {
+    position: absolute; inset: 0; z-index: 60; cursor: pointer;
+    border-radius: inherit;
+    background:
+      linear-gradient(115deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 28%, transparent 45%),
+      linear-gradient(180deg, #060910, #04060b 60%, #05070d);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+    opacity: 1; transition: opacity 0.9s ease;
+  }
+  #lockscreen.off { opacity: 0; pointer-events: none; }
+  #lockscreen .lock-mark {
+    width: 44px; color: rgba(255, 255, 255, 0.22);
+    animation: lockBreath 4.5s ease-in-out infinite;
+  }
+  #lockscreen .lock-hint {
+    font-size: 12.5px; color: rgba(255, 255, 255, 0.30);
+    letter-spacing: 0.05em;
+    animation: lockBreath 4.5s ease-in-out infinite;
+  }
+  @keyframes lockBreath { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { #lockscreen .lock-mark, #lockscreen .lock-hint { animation: none; } }
 
   /* ---------- Phone frame ---------- */
   .phone {
@@ -282,6 +304,9 @@
 </style>
 </head>
 <body>
+<script>if (window.self !== window.top) document.body.classList.add('embedded');
+
+</script>
 
 <!-- SF-Symbol-style icon set -->
 <svg width="0" height="0" style="position:absolute">
@@ -309,6 +334,18 @@
 <div id="scaler">
   <div class="phone">
     <div class="island"></div>
+
+    <!-- Idle lock screen: the simulator waits for the user -->
+    <div id="lockscreen" onclick="unlockPhone()" role="button" aria-label="ابدأ التجربة">
+      <svg class="lock-mark" viewBox="0 0 104 122" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M28 15l8 11"/><path d="M52 7v14"/><path d="M76 15l-8 11"/>
+          <path d="M40 89 C 26 81 18 67.5 21 53.5 C 24 37.5 37 27 52 27 C 67 27 80 37.5 83 53.5 C 85.5 65.5 80 76.5 70.5 83 C 65 86.5 62.5 90.5 62.5 96.5"/>
+          <path d="M39 108h26"/><path d="M44 120h16"/>
+        </g>
+      </svg>
+      <span class="lock-hint">اضغط لتجربة وضّح</span>
+    </div>
 
     <!-- ============ Screen 1: Home ============ -->
     <section class="screen active" id="screen-home">
@@ -508,6 +545,7 @@ function bubbleAssistant(text, actions) {
 
 let openingReplyTimer;
 function openChat(scenarioKey, merchant) {
+  try { window.parent !== window && window.parent.postMessage({ type: 'wadhah-analyzing' }, '*'); } catch (e) {}
   const sc = SCENARIOS[scenarioKey] || genericScenario(merchant || "المتجر");
   clearTimeout(openingReplyTimer);
   // Wadhah "analyzes" the transaction first: question + typing indicator,
@@ -564,6 +602,13 @@ function sendMessage() {
 
 /* ---------------- Toast + scaling ---------------- */
 let toastTimer;
+function unlockPhone() {
+  const ls = document.getElementById('lockscreen');
+  if (!ls || ls.classList.contains('off')) return;
+  ls.classList.add('off');
+  try { window.parent !== window && window.parent.postMessage({ type: 'wadhah-unlocked' }, '*'); } catch (e) {}
+  setTimeout(() => ls.remove(), 1000);
+}
 function toast() {
   const t = document.getElementById("toast");
   t.classList.add("show");
