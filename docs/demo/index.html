@@ -369,6 +369,7 @@
     margin-top: 8px; font-size: 11.5px; font-weight: 700;
     color: #A2542E; text-decoration: underline;
   }
+  .ai-note { font-size: 10px; color: var(--text-2); margin: 4px 54px 0 0; }
 
   /* ---------- Toast ---------- */
   .toast {
@@ -809,13 +810,44 @@ function sendMessage() {
   scrollChat();
 
   setTimeout(() => {
-    document.getElementById(typingId).remove();
     const res = WadhahEngine.matchFromText(text);
-    thread.insertAdjacentHTML("beforeend",
-      (res ? identityCard(res, null) : noMatchBubble()) +
-      '<div class="msg-time">وضح · الآن</div>');
-    scrollChat();
+    if (res) {
+      // المسار الأول: المحرك الحتمي — بطاقة هوية موثقة فورية
+      document.getElementById(typingId)?.remove();
+      thread.insertAdjacentHTML("beforeend",
+        identityCard(res, null) + '<div class="msg-time">وضح · الآن</div>');
+      scrollChat();
+      return;
+    }
+    // لا مطابقة في الجدول → سؤال حر يجيب عليه الذكاء الاصطناعي عبر /api/chat
+    askAI(text, typingId);
   }, 1100);
+}
+
+/* سؤال حر → دالة Vercel الخلفية (المفتاح في متغير بيئة على الخادم فقط).
+   أي فشل — لا مفتاح، لا اتصال، استضافة ثابتة — يرجع للرد الافتراضي. */
+async function askAI(text, typingId) {
+  let reply = null;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 12000);
+    const r = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+      signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    if (r.ok) reply = (await r.json()).reply;
+  } catch (e) { /* يسقط للرد الافتراضي */ }
+
+  document.getElementById(typingId)?.remove();
+  thread.insertAdjacentHTML("beforeend",
+    (reply
+      ? bubbleAssistant(reply, null) + '<div class="ai-note">✦ إجابة الذكاء الاصطناعي — هوية التجار الموثقة مصدرها واثق</div>'
+      : noMatchBubble()) +
+    '<div class="msg-time">وضح · الآن</div>');
+  scrollChat();
 }
 
 /* ---------------- Toast + scaling ---------------- */
