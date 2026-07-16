@@ -596,10 +596,18 @@ document.getElementById("history-list").innerHTML =
 /* ---------------- Chat ---------------- */
 const thread = document.getElementById("chat-thread");
 
-function bubbleUser(text) {
-  return '<div class="msg-row-user"><div class="msg-user">' + text + "</div></div>";
+/* تهريب HTML — نصوص العميل وردود النموذج تُعرض كنص لا كوسوم */
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
-function bubbleAssistant(text, actions) {
+
+function bubbleUser(text) {
+  return '<div class="msg-row-user"><div class="msg-user">' + escapeHTML(text) + "</div></div>";
+}
+/* trustedHTML: للنداءات الداخلية فقط (نصوص نبنيها نحن بوسوم مقصودة) */
+function bubbleAssistant(text, actions, trustedHTML) {
+  const body = (trustedHTML ? String(text) : escapeHTML(text)).replace(/\n/g, "<br>");
   const btns = actions && actions.length
     ? '<div class="msg-actions">' +
       '<button class="chat-btn primary" onclick="toast()">' + actions[0] + "</button>" +
@@ -608,7 +616,7 @@ function bubbleAssistant(text, actions) {
     : "";
   return (
     '<div class="msg-row-assist">' +
-      '<div class="msg-assist"><div>' + text.replace(/\n/g, "<br>") + "</div>" + btns + "</div>" +
+      '<div class="msg-assist"><div>' + body + "</div>" + btns + "</div>" +
       '<div class="msg-avatar"><img src="assets/wad.png" alt=""></div>' +
     "</div>"
   );
@@ -761,9 +769,29 @@ function fileDispute(merchantId) {
       "• " + idLine + "\n" +
       "• تفاصيل العملية والطابع الزمني من سجل حسابك\n" +
       "• نتيجة المطابقة ودرجة الثقة\n" +
-      "الملف جاهز للإرسال لفريق النزاعات.", null) +
+      "الملف جاهز للإرسال لفريق النزاعات.", null, true) +
     '<div class="msg-time">وضح · الآن</div>');
   scrollChat();
+}
+
+/* العملية محل الاستفسار (التي ضُغط زر وضّح بجانبها) + سجل المحادثة للنموذج.
+   chatGen: عدّاد جيل المحادثة — أي رد وصل متأخرًا من محادثة سابقة يُهمل. */
+let activeTx = null;
+let chatLog = [];
+let chatGen = 0;
+
+function logMsg(role, content) {
+  chatLog.push({ role, content: String(content).slice(0, 800) });
+  if (chatLog.length > 24) chatLog = chatLog.slice(-24);
+}
+
+function cardSummaryForLog(res, tx) {
+  if (!res) return "لم أستطع توثيق هذا الاسم من الجدول التجريبي الحالي.";
+  const m = res.merchant;
+  return "عرضتُ بطاقة الهوية الموثقة للتاجر " + m.displayName +
+    (m.legalName && m.legalName !== m.displayName ? " (" + m.legalName + ")" : "") +
+    (tx ? " للعملية: " + tx.m + " · " + tx.s + " · " + tx.a : "") +
+    (m.explanationShort ? ". " + m.explanationShort : "");
 }
 
 let openingReplyTimer;
@@ -771,6 +799,10 @@ function openChat(idx) {
   try { window.parent !== window && window.parent.postMessage({ type: 'wadhah-analyzing' }, '*'); } catch (e) {}
   const tx = HISTORY_TX[idx];
   const res = WadhahEngine.match(tx.m);
+  chatGen++;
+  activeTx = { tx, merchant: res ? res.merchant : null };
+  chatLog = [];
+  logMsg("user", userQuestion(res && res.merchant, tx.m));
   clearTimeout(openingReplyTimer);
   // وضّح "يحلل" العملية أولًا: السؤال + مؤشر الكتابة، ثم البطاقة تصل بعد لحظة.
   thread.innerHTML = bubbleUser(userQuestion(res && res.merchant, tx.m)) + typingRow("opening-typing");
@@ -784,6 +816,7 @@ function openChat(idx) {
     thread.insertAdjacentHTML("beforeend",
       (res ? identityCard(res, tx) : noMatchBubble()) +
       '<div class="msg-time">وضح · الآن</div>');
+    logMsg("assistant", cardSummaryForLog(res, tx));
     scrollChat();
   }, 1400);
 }
@@ -799,6 +832,10 @@ function sendMessage() {
   if (!text) return;
   field.value = "";
   thread.insertAdjacentHTML("beforeend", bubbleUser(text));
+  // لقطة التاريخ تُؤخذ الآن (قبل إضافة الرسالة الحالية) لتفادي سباق التوقيت
+  const history = chatLog.slice(-8);
+  const gen = chatGen;
+  logMsg("user", text);
   scrollChat();
 
   const typingId = "typing-" + Date.now();
@@ -810,6 +847,7 @@ function sendMessage() {
   scrollChat();
 
   setTimeout(() => {
+    if (gen !== chatGen) return; // فُتحت محادثة جديدة أثناء الانتظار
     // سؤال صريح (كم؟ متى؟ ليش؟…) يذهب للذكاء الاصطناعي حتى لو ذكر اسم تاجر —
     // البطاقة تجيب "من هو التاجر" لكنها لا تجيب "كم دفعت له".
     const res = isQuestion(text) ? null : WadhahEngine.matchFromText(text);
@@ -818,11 +856,13 @@ function sendMessage() {
       document.getElementById(typingId)?.remove();
       thread.insertAdjacentHTML("beforeend",
         identityCard(res, null) + '<div class="msg-time">وضح · الآن</div>');
+      activeTx = { tx: null, merchant: res.merchant };
+      logMsg("assistant", cardSummaryForLog(res, null));
       scrollChat();
       return;
     }
     // سؤال حر يجيب عليه الذكاء الاصطناعي عبر /api/chat
-    askAI(text, typingId);
+    askAI(text, typingId, history, gen);
   }, 1100);
 }
 
@@ -853,9 +893,22 @@ function buildAIContext() {
          txLines + "\n\nجدول التجار المعروفين:\n" + merchLines;
 }
 
+/* وصف العملية محل الاستفسار — يوجه النموذج للإجابة عنها تحديدًا */
+function buildFocus() {
+  if (!activeTx || (!activeTx.tx && !activeTx.merchant)) return null;
+  const t = activeTx.tx, m = activeTx.merchant;
+  const parts = [];
+  if (t) parts.push("العملية: " + t.m + " | " + t.s + " | خصم " + t.a.replace(/[-\s]|SAR/g, "") + " ريال");
+  if (m) parts.push("التاجر: " + m.displayName +
+    (m.legalName && m.legalName !== m.displayName ? " — الاسم الرسمي: " + m.legalName : "") +
+    (m.explanationShort ? " — " + m.explanationShort : ""));
+  return parts.join("\n");
+}
+
 /* سؤال حر → دالة Vercel الخلفية (المفتاح في متغير بيئة على الخادم فقط).
+   يُرسل معه: سياق الحساب + العملية محل الاستفسار + آخر رسائل المحادثة.
    أي فشل — لا مفتاح، لا اتصال، استضافة ثابتة — يرجع للرد الافتراضي. */
-async function askAI(text, typingId) {
+async function askAI(text, typingId, history, gen) {
   let reply = null;
   try {
     const ctrl = new AbortController();
@@ -863,19 +916,26 @@ async function askAI(text, typingId) {
     const r = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, context: buildAIContext() }),
+      body: JSON.stringify({
+        message: text,
+        context: buildAIContext(),
+        focus: buildFocus(),
+        history // لقطة مأخوذة عند الإرسال — بدون الرسالة الحالية
+      }),
       signal: ctrl.signal
     });
     clearTimeout(timer);
     if (r.ok) reply = (await r.json()).reply;
   } catch (e) { /* يسقط للرد الافتراضي */ }
 
+  if (gen !== chatGen) return; // رد متأخر من محادثة سابقة — يُهمل
   document.getElementById(typingId)?.remove();
   thread.insertAdjacentHTML("beforeend",
     (reply
       ? bubbleAssistant(reply, null) + '<div class="ai-note">✦ إجابة الذكاء الاصطناعي — هوية التجار الموثقة مصدرها واثق</div>'
       : noMatchBubble()) +
     '<div class="msg-time">وضح · الآن</div>');
+  if (reply) logMsg("assistant", reply);
   scrollChat();
 }
 

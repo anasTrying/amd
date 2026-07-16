@@ -20,7 +20,10 @@ SYSTEM_PROMPT = (
     "أنت \"وضّح\"، مساعد بنكي ذكي داخل تطبيق البنك في السعودية. "
     "فسّر عمليات كشف الحساب والرسوم والاشتراكات بلغة سؤال العميل (العربية افتراضًا) وبإيجاز (٣ جمل كحد أقصى). "
     "ستصلك قائمة عمليات حساب العميل — اعتمد عليها في أي سؤال عن العمليات والمبالغ. "
+    "إذا حُدِّدت \"عملية محل الاستفسار\" فهي المقصودة بأي سؤال غامض أو ضمير — أجب عنها هي تحديدًا "
+    "ولا تخلط بينها وبين عمليات أخرى إلا إذا سأل العميل عن غيرها صراحةً أو عن حسابه كله. "
     "قبل أي جواب حسابي أو ترتيبي رتّب القيم واحسب خطوة بخطوة داخليًا ثم أعط الجواب النهائي فقط. "
+    "تابع سياق المحادثة السابقة إن وُجدت. "
     "هوية التجار تُوثَّق من منصة واثق. لا تختلق أرقام سجلات أو مبالغ غير موجودة في البيانات، "
     "ولا تتعامل مع بيانات شخصية. الأسئلة العامة خارج نطاق البنوك مرحب بها: "
     "أجب عليها بإيجاز وودّية كمساعد ذكي شامل."
@@ -52,15 +55,28 @@ class Handler(SimpleHTTPRequestHandler):
             body = json.loads(self.rfile.read(length))
             message = body.get("message", "")
             context = body.get("context", "")
+            focus = body.get("focus", "")
+            history = body.get("history", [])
             if not message or not isinstance(message, str) or len(message) > 500:
                 return self._json(400, {"error": "bad-request"})
 
             messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-            if context and isinstance(context, str) and len(context) <= 6000:
+            if context and isinstance(context, str):
                 messages.append({
                     "role": "system",
-                    "content": "بيانات حساب العرض التجريبي كما تظهر في واجهة المحاكي الآن:\n" + context,
+                    "content": "بيانات حساب العرض التجريبي كما تظهر في واجهة المحاكي الآن:\n" + context[:6000],
                 })
+            if focus and isinstance(focus, str):
+                messages.append({
+                    "role": "system",
+                    "content": "العملية محل الاستفسار — ضغط العميل زر (وضّح) بجانبها، فأي سؤال غامض يقصدها هي:\n" + focus[:1200],
+                })
+            # الحدود تقصّ ولا تُسقط — كما في دالة Vercel
+            if isinstance(history, list):
+                for h in history[-8:]:
+                    if (isinstance(h, dict) and h.get("role") in ("user", "assistant")
+                            and isinstance(h.get("content"), str) and h["content"]):
+                        messages.append({"role": h["role"], "content": h["content"][:800]})
             messages.append({"role": "user", "content": message})
 
             payload = json.dumps({
