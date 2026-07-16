@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>وضّح — Wadhah Mockup</title>
+<!-- Leaflet (خرائط مفتوحة المصدر — بدون مفتاح API) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
   :root {
     /* لوحة مستوحاة من هوية هاكاثون امد: نيلي عميق + طيني دافئ + بنفسجي + كريمي */
@@ -327,6 +332,44 @@
   .vc-how .steps { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: #6E665C; line-height: 1.7; }
   .vc-how .steps b { color: #2A2A2A; }
 
+  /* ---------- موقع نقطة البيع (Leaflet) ---------- */
+  .vc-loc { border-top: 1px dashed #E0D7CA; padding-top: 9px; }
+  .vc-loc summary { font-size: 11.5px; font-weight: 700; color: #8A8177; cursor: pointer; list-style: none; }
+  .vc-loc summary::-webkit-details-marker { display: none; }
+  .vc-loc summary::before { content: "▸ "; }
+  .vc-loc[open] summary::before { content: "▾ "; }
+  .vc-loc .loc-branch { margin-top: 8px; font-size: 11.5px; font-weight: 700; color: #2A2A2A; }
+  .vc-loc .loc-address { font-size: 11px; color: #6E665C; line-height: 1.7; margin-top: 2px; }
+  .vc-map {
+    height: 150px; margin-top: 8px; border-radius: 12px;
+    border: 1px solid #E0D7CA; overflow: hidden;
+    background: #1B1A38; direction: ltr; /* Leaflet يفترض LTR داخليًا */
+  }
+  .vc-map .leaflet-control-attribution { font-size: 8px; background: rgba(10,9,24,.6); color: rgba(243,235,221,.5); }
+  .vc-map .leaflet-control-attribution a { color: rgba(243,235,221,.65); }
+  .pos-pin { position: relative; }
+  .pos-pin .dot {
+    position: absolute; inset: 0; margin: auto;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); border: 2.5px solid #F3EBDD;
+    box-shadow: 0 1px 6px rgba(0,0,0,.55);
+  }
+  .pos-pin .halo {
+    position: absolute; inset: 0; margin: auto;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: rgba(198,110,78,.45);
+    animation: posPulse 1.8s ease-out infinite;
+  }
+  @keyframes posPulse {
+    0% { transform: scale(1); opacity: .8; }
+    100% { transform: scale(3.2); opacity: 0; }
+  }
+  .loc-gmaps {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 8px; font-size: 11.5px; font-weight: 700;
+    color: #A2542E; text-decoration: underline;
+  }
+
   /* ---------- Toast ---------- */
   .toast {
     position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(8px);
@@ -599,7 +642,19 @@ function identityCard(res, tx) {
   rows +=
     '<div class="vc-row"><span class="k">النشاط</span><span class="v">' + m.activities[0].name + '</span></div>' +
     (m.city ? '<div class="vc-row"><span class="k">المدينة</span><span class="v">' + m.city + '</span></div>' : "") +
+    (!m.location ? '<div class="vc-row"><span class="k">الموقع</span><span class="v">عملية إلكترونية — بدون نقطة بيع</span></div>' : "") +
     (tx ? '<div class="vc-row"><span class="k">العملية</span><span class="v"><span class="num">' + tx.a + '</span> · ' + tx.s + '</span></div>' : "");
+
+  const loc = m.location;
+  const locBlock = loc
+    ? '<details class="vc-loc" ontoggle="initPosMap(this)" data-lat="' + loc.lat + '" data-lng="' + loc.lng + '">' +
+        '<summary>📍 موقع نقطة البيع</summary>' +
+        '<div class="loc-branch">' + (loc.branchLabel || m.displayName) + '</div>' +
+        (loc.address ? '<div class="loc-address">' + loc.address + '</div>' : "") +
+        '<div class="vc-map"></div>' +
+        '<a class="loc-gmaps" href="https://www.google.com/maps/search/?api=1&query=' + loc.lat + ',' + loc.lng + '" target="_blank" rel="noopener">فتح في خرائط Google ↗</a>' +
+      "</details>"
+    : "";
 
   const legalLine = m.legalName && m.legalName !== m.displayName
     ? 'الاسم الرسمي: <bdi>' + m.legalName + '</bdi>' + (m.displayBranch ? ' · ' + m.displayBranch : "")
@@ -636,7 +691,7 @@ function identityCard(res, tx) {
         '<div><div class="vc-name">' + m.displayName + '</div><div class="vc-sub">' + legalLine + "</div></div>" +
         '<div class="vc-rows">' + rows + "</div>" +
         explainBlock +
-        how + actions +
+        locBlock + how + actions +
       "</div>" +
       '<div class="msg-avatar"><img src="assets/wad.png" alt=""></div>' +
     "</div>"
@@ -647,6 +702,35 @@ function toggleExplain(el) {
   const full = el.nextElementSibling;
   const open = full.classList.toggle("show");
   el.textContent = open ? "إخفاء التفاصيل" : "عرض التفاصيل";
+}
+
+/* خريطة نقطة البيع: تُنشأ عند أول فتح فقط (Leaflet + بلاطات CARTO الداكنة) */
+const POS_MAPS = {};
+let posMapSeq = 0;
+function initPosMap(el) {
+  if (!el.open) return;
+  const container = el.querySelector(".vc-map");
+  if (!container) return;
+  if (typeof L === "undefined") { container.style.display = "none"; return; } // لا اتصال — يبقى العنوان ورابط قوقل
+  if (el.dataset.mapId) { POS_MAPS[el.dataset.mapId].invalidateSize(); return; }
+
+  const lat = parseFloat(el.dataset.lat), lng = parseFloat(el.dataset.lng);
+  const map = L.map(container, {
+    zoomControl: false, scrollWheelZoom: false, tap: false,
+    center: [lat, lng], zoom: 15
+  });
+  map.attributionControl.setPrefix(false);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  }).addTo(map);
+  L.marker([lat, lng], {
+    icon: L.divIcon({ className: "pos-pin", html: '<span class="halo"></span><span class="dot"></span>', iconSize: [46, 46] })
+  }).addTo(map);
+
+  el.dataset.mapId = String(++posMapSeq);
+  POS_MAPS[el.dataset.mapId] = map;
+  setTimeout(() => map.invalidateSize(), 60);
 }
 
 function noMatchBubble() {
