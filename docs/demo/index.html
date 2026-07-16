@@ -824,6 +824,21 @@ function sendMessage() {
   }, 1100);
 }
 
+/* يبني سياق الحساب للنموذج: كل عمليات السجل + جدول التجار الموثقين،
+   حتى يجيب بدقة عن أسئلة مثل "كم صرفت اليوم؟" أو "وش أكبر عملية؟" */
+function buildAIContext() {
+  const txLines = HISTORY_TX.map(t => "- " + t.m + " | " + t.s + " | " + t.a).join("\n");
+  const merchLines = WATHQ_MERCHANTS.map(m =>
+    "- " + [m.displayName,
+            m.legalName && m.legalName !== m.displayName ? "الاسم الرسمي: " + m.legalName : null,
+            m.categoryLabel, m.city,
+            m.crNumber ? "سجل تجاري " + m.crNumber + " (موثق من واثق)" : "قيد التوثيق",
+            m.location ? "الموقع: " + m.location.branchLabel : "عملية إلكترونية"]
+      .filter(Boolean).join(" · ")).join("\n");
+  return "عمليات حساب العميل في العرض التجريبي (الاسم كما في الكشف | الوصف والتاريخ | المبلغ):\n" +
+         txLines + "\n\nجدول التجار المعروفين:\n" + merchLines;
+}
+
 /* سؤال حر → دالة Vercel الخلفية (المفتاح في متغير بيئة على الخادم فقط).
    أي فشل — لا مفتاح، لا اتصال، استضافة ثابتة — يرجع للرد الافتراضي. */
 async function askAI(text, typingId) {
@@ -834,7 +849,7 @@ async function askAI(text, typingId) {
     const r = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({ message: text, context: buildAIContext() }),
       signal: ctrl.signal
     });
     clearTimeout(timer);

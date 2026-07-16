@@ -19,8 +19,10 @@ DOCS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "docs")
 SYSTEM_PROMPT = (
     "أنت \"وضّح\"، مساعد بنكي ذكي داخل تطبيق البنك في السعودية. "
     "فسّر عمليات كشف الحساب والرسوم والاشتراكات بالعربية وبإيجاز (٣ جمل كحد أقصى). "
-    "هوية التجار تُوثَّق من منصة واثق. لا تختلق أرقام سجلات أو مبالغ، "
-    "ولا تتعامل مع بيانات شخصية، وأعد التوجيه بلطف إن خرج السؤال عن نطاقك."
+    "ستصلك قائمة عمليات حساب العميل — اعتمد عليها في أي سؤال عن العمليات والمبالغ واحسب بدقة. "
+    "هوية التجار تُوثَّق من منصة واثق. لا تختلق أرقام سجلات أو مبالغ غير موجودة في البيانات، "
+    "ولا تتعامل مع بيانات شخصية. الأسئلة العامة خارج نطاق البنوك مرحب بها: "
+    "أجب عليها بإيجاز وودّية كمساعد ذكي شامل."
 )
 
 
@@ -46,18 +48,25 @@ class Handler(SimpleHTTPRequestHandler):
 
         try:
             length = int(self.headers.get("Content-Length", 0))
-            message = json.loads(self.rfile.read(length)).get("message", "")
+            body = json.loads(self.rfile.read(length))
+            message = body.get("message", "")
+            context = body.get("context", "")
             if not message or not isinstance(message, str) or len(message) > 500:
                 return self._json(400, {"error": "bad-request"})
+
+            messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+            if context and isinstance(context, str) and len(context) <= 6000:
+                messages.append({
+                    "role": "system",
+                    "content": "بيانات حساب العرض التجريبي كما تظهر في واجهة المحاكي الآن:\n" + context,
+                })
+            messages.append({"role": "user", "content": message})
 
             payload = json.dumps({
                 "model": "gpt-4o-mini",
                 "temperature": 0.4,
-                "max_tokens": 220,
-                "messages": [
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": message},
-                ],
+                "max_tokens": 300,
+                "messages": messages,
             }).encode()
 
             # نستخدم curl بدل urllib لأن بايثون النظام على ماك قد يفتقد شهادات
