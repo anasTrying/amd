@@ -10,7 +10,7 @@
 """
 import json
 import os
-import urllib.request
+import subprocess
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = 4173
@@ -50,24 +50,29 @@ class Handler(SimpleHTTPRequestHandler):
             if not message or not isinstance(message, str) or len(message) > 500:
                 return self._json(400, {"error": "bad-request"})
 
-            req = urllib.request.Request(
-                "https://api.openai.com/v1/chat/completions",
-                data=json.dumps({
-                    "model": "gpt-4o-mini",
-                    "temperature": 0.4,
-                    "max_tokens": 220,
-                    "messages": [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": message},
-                    ],
-                }).encode(),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + key,
-                },
+            payload = json.dumps({
+                "model": "gpt-4o-mini",
+                "temperature": 0.4,
+                "max_tokens": 220,
+                "messages": [
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": message},
+                ],
+            }).encode()
+
+            # نستخدم curl بدل urllib لأن بايثون النظام على ماك قد يفتقد شهادات
+            # SSL؛ المفتاح يمرَّر عبر البيئة لا عبر سطر الأوامر.
+            proc = subprocess.run(
+                ["sh", "-c",
+                 'curl -s --max-time 20 https://api.openai.com/v1/chat/completions'
+                 ' -H "Content-Type: application/json"'
+                 ' -H "Authorization: Bearer $OPENAI_API_KEY" --data-binary @-'],
+                input=payload, capture_output=True, timeout=25,
             )
-            with urllib.request.urlopen(req, timeout=20) as resp:
-                data = json.load(resp)
+            data = json.loads(proc.stdout)
+            if "error" in data:
+                print("openai error:", data["error"].get("message", ""))
+                return self._json(502, {"error": "upstream"})
             reply = data["choices"][0]["message"]["content"].strip()
             return self._json(200, {"reply": reply})
         except Exception as e:  # noqa: BLE001 — خادم تجريبي محلي
