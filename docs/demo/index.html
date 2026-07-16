@@ -810,32 +810,46 @@ function sendMessage() {
   scrollChat();
 
   setTimeout(() => {
-    const res = WadhahEngine.matchFromText(text);
+    // سؤال صريح (كم؟ متى؟ ليش؟…) يذهب للذكاء الاصطناعي حتى لو ذكر اسم تاجر —
+    // البطاقة تجيب "من هو التاجر" لكنها لا تجيب "كم دفعت له".
+    const res = isQuestion(text) ? null : WadhahEngine.matchFromText(text);
     if (res) {
-      // المسار الأول: المحرك الحتمي — بطاقة هوية موثقة فورية
+      // المسار الأول: المحرك الحتمي — بطاقة هوية موثقة فورية لاسم/وصف ملصوق
       document.getElementById(typingId)?.remove();
       thread.insertAdjacentHTML("beforeend",
         identityCard(res, null) + '<div class="msg-time">وضح · الآن</div>');
       scrollChat();
       return;
     }
-    // لا مطابقة في الجدول → سؤال حر يجيب عليه الذكاء الاصطناعي عبر /api/chat
+    // سؤال حر يجيب عليه الذكاء الاصطناعي عبر /api/chat
     askAI(text, typingId);
   }, 1100);
+}
+
+/* هل النص سؤال؟ علامة استفهام أو أداة استفهام عربية/إنجليزية */
+function isQuestion(text) {
+  if (/[؟?]/.test(text)) return true;
+  const t = " " + WadhahEngine.normalize(text) + " ";
+  return /\s(كم|ليش|لماذا|متي|وش|ايش|هل|كيف|وين|اين|مين|من هو|لو سمحت كم|what|how|why|when|where|who|which|did|do|does|can|is|are)\s/
+    .test(t);
 }
 
 /* يبني سياق الحساب للنموذج: كل عمليات السجل + جدول التجار الموثقين،
    حتى يجيب بدقة عن أسئلة مثل "كم صرفت اليوم؟" أو "وش أكبر عملية؟" */
 function buildAIContext() {
-  const txLines = HISTORY_TX.map(t => "- " + t.m + " | " + t.s + " | " + t.a).join("\n");
+  // المبالغ تُعرض كخصم موجب حتى لا تُربك الإشارة السالبة أسئلة الترتيب
+  // ("أكبر عملية" = أعلى مبلغ مخصوم)
+  const txLines = HISTORY_TX.map(t =>
+    "- " + t.m + " | " + t.s + " | خصم " + t.a.replace(/[-\s]|SAR/g, "") + " ريال").join("\n");
   const merchLines = WATHQ_MERCHANTS.map(m =>
     "- " + [m.displayName,
             m.legalName && m.legalName !== m.displayName ? "الاسم الرسمي: " + m.legalName : null,
             m.categoryLabel, m.city,
             m.crNumber ? "سجل تجاري " + m.crNumber + " (موثق من واثق)" : "قيد التوثيق",
-            m.location ? "الموقع: " + m.location.branchLabel : "عملية إلكترونية"]
+            m.location ? "الموقع: " + m.location.branchLabel : "عملية إلكترونية",
+            m.explanationShort]
       .filter(Boolean).join(" · ")).join("\n");
-  return "عمليات حساب العميل في العرض التجريبي (الاسم كما في الكشف | الوصف والتاريخ | المبلغ):\n" +
+  return "عمليات حساب العميل في العرض التجريبي — كلها عمليات خصم/مصروفات (الاسم كما في الكشف | الوصف والتاريخ | المبلغ المخصوم):\n" +
          txLines + "\n\nجدول التجار المعروفين:\n" + merchLines;
 }
 
