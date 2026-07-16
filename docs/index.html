@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>وضّح — Wadhah | مساعدك البنكي الذكي</title>
-<meta name="description" content="Wadhah (وضّح) — a generative AI assistant inside the banking app that turns confusing bank statements into clear, human answers.">
+<meta name="description" content="Wadhah (وضّح) — turns cryptic bank statement entries into government-verified merchant identities, inside the banking app.">
 <link rel="icon" href="assets/wad.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -794,11 +794,32 @@
         <span>وضّح</span>
       </div>
     </div>
-    <p class="stack-line" data-reveal>Flutter · GPT-4o · Merchant Resolution · Maps API · Banking Logic</p>
+    <p class="stack-line" data-reveal>SwiftUI · Kotlin Multiplatform · Wathq Registry Data · Deterministic Matching · Banking Logic</p>
   </div>
 </section>
 
-<!-- ================= Vision 2030 ================= -->
+<!-- ================= Impact on the bank ================= -->
+<section id="impact">
+  <div class="container">
+    <h2 class="section-title" data-reveal data-i18n="impact_title"></h2>
+    <p class="section-sub" data-reveal data-i18n="impact_sub"></p>
+    <div class="grid-3">
+      <div class="feature" data-reveal>
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M9.5 21v-4.5h5V21"/><path d="M9.5 11h.01M14.5 11h.01"/></svg></div>
+        <h3 data-i18n="i1_t"></h3><p data-i18n="i1_b"></p>
+      </div>
+      <div class="feature" data-reveal>
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 16 0"/><rect x="2.5" y="12" width="4.5" height="7" rx="2"/><rect x="17" y="12" width="4.5" height="7" rx="2"/><path d="M19 19a4 4 0 0 1-4 3.5h-2"/></svg></div>
+        <h3 data-i18n="i2_t"></h3><p data-i18n="i2_b"></p>
+      </div>
+      <div class="feature" data-reveal>
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12.5l2.3 2.3 4.7-4.8"/></svg></div>
+        <h3 data-i18n="i3_t"></h3><p data-i18n="i3_b"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ================= Verified stats: auto-playing light sequence ================= -->
 <section id="stats">
   <div class="container">
@@ -883,16 +904,24 @@ const I18N = {
     story_caption: 'من الغموض… إلى الوضوح.',
     clean_sub: 'اشتراك شهري — يتجدد تلقائياً',
     vision_tagline: 'من التعقيد… إلى الوضوح.',
+    impact_title: 'الأثر على البنك',
+    impact_sub: 'وضّح ليس فكرة معزولة — هو طبقة قابلة للتطبيق فعليًا في القطاع المصرفي السعودي.',
+    i1_t: 'يندمج داخل تطبيق البنك',
+    i1_b: 'طبقة ذكاء تُضاف إلى تطبيق المصرف الحالي كما هو — بدون تطبيق منفصل، وبدون تغيير بنية الأنظمة المصرفية.',
+    i2_t: 'يخفف الضغط عن مراكز الاتصال',
+    i2_b: 'جزء كبير من المكالمات استفسارات عن عمليات غامضة في الكشف — وضّح يجيب عنها داخل التطبيق فورًا وبتكلفة تشغيلية أقل.',
+    i3_t: 'يرفع ثقة العميل بمصرفه',
+    i3_b: 'العميل الذي يفهم كل عملية في حسابه عميل أكثر ثقة، وأكثر استخدامًا للخدمات الرقمية بدلًا من الاعتراضات غير الضرورية.',
     s1_n: '72%',
     s1_t: 'من رموز العمليات البنكية غير مألوفة للمستخدم',
     s2_n: '50%',
     s2_t: 'من استفسارات الدعم البنكي سببها غموض اسم التاجر',
-    s3_n: '0 ثانية',
-    s3_t: 'لمعالجة البيانات وتحويلها للغة تفهمها',
+    s3_n: 'أقل من ثانية',
+    s3_t: 'من الوصف الغامض إلى هوية موثقة من السجل التجاري',
     s_punch: 'لا مزيد من الأسئلة. كل عملية بنكية، الآن مكشوفة وواضحة.',
     p1: 'عملية بنكية',
     p2: 'فهم السياق',
-    p3: 'تحليل الذكاء الاصطناعي',
+    p3: 'مطابقة مع السجل التجاري (واثق)',
     p4: 'تحديد التاجر الفعلي',
     p5: 'شرح بلغة طبيعية',
     vision_k1: 'الشفافية',
@@ -940,16 +969,24 @@ const I18N = {
     story_caption: 'From ambiguity to clarity.',
     clean_sub: 'Monthly subscription — renews automatically',
     vision_tagline: 'From complexity… to clarity.',
+    impact_title: 'Impact on the bank',
+    impact_sub: 'Wadhah is not an isolated idea — it is a layer that plugs into the Saudi banking sector today.',
+    i1_t: 'Embeds inside the bank app',
+    i1_b: 'An intelligence layer added to the existing banking app as-is — no separate app, no changes to core systems.',
+    i2_t: 'Relieves call-center pressure',
+    i2_b: 'A large share of calls are questions about cryptic statement entries — Wadhah answers them in-app, instantly, at lower cost.',
+    i3_t: 'Builds customer trust',
+    i3_b: 'A customer who understands every transaction trusts the bank more — and uses digital services instead of unnecessary disputes.',
     s1_n: '72%',
     s1_t: 'of bank transaction descriptors are unfamiliar to users',
     s2_n: '50%',
     s2_t: 'of banking support inquiries stem from unclear merchant names',
-    s3_n: '0 sec',
-    s3_t: 'to process the data into language you understand',
+    s3_n: '< 1 sec',
+    s3_t: 'from a cryptic descriptor to a registry-verified identity',
     s_punch: 'No more questions. Every bank transaction, now clear and understood.',
     p1: 'Bank transaction',
     p2: 'Context understanding',
-    p3: 'AI analysis',
+    p3: 'Registry matching (Wathq)',
     p4: 'Merchant resolution',
     p5: 'Natural explanation',
     vision_k1: 'Transparency',

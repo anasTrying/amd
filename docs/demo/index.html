@@ -6,22 +6,26 @@
 <title>وضّح — Wadhah Mockup</title>
 <style>
   :root {
-    --bg: #0B1F32;
-    --card: #122B40;
-    --card-elev: #1A3B50;
-    --accent: #E65C00;
-    --copper: #D17D58;
-    --user-bubble: #1E63D0;
-    --assist-bubble: #F4EDE6;
-    --lavender: #8B7BC7;
+    /* لوحة مستوحاة من هوية هاكاثون امد: نيلي عميق + طيني دافئ + بنفسجي + كريمي */
+    --bg: #16152F;
+    --card: #201F42;
+    --card-elev: #2B2A54;
+    --accent: #C66E4E;
+    --copper: #D98A67;
+    --user-bubble: #8E8AD8;
+    --assist-bubble: #F3EBDD;
+    --lavender: #8E8AD8;
     --text: #FFFFFF;
-    --text-2: rgba(255,255,255,.55);
+    --text-2: rgba(243,235,221,.55);
     --radius: 16px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
   html, body { height: 100%; }
   body {
-    background: #07090E;
+    background:
+      radial-gradient(620px 420px at 82% 12%, rgba(198,110,78,.14), transparent 65%),
+      radial-gradient(560px 420px at 12% 88%, rgba(142,138,216,.10), transparent 65%),
+      #0A0918;
     font-family: -apple-system, "SF Pro Text", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
@@ -33,7 +37,7 @@
     border-radius: inherit;
     background:
       linear-gradient(115deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 28%, transparent 45%),
-      linear-gradient(180deg, #060910, #04060b 60%, #05070d);
+      linear-gradient(180deg, #0B0A20, #060512 60%, #080719);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
     opacity: 1; transition: opacity 0.9s ease;
   }
@@ -56,7 +60,7 @@
     background: var(--bg);
     border: 13px solid #0c0c0e;
     border-radius: 58px;
-    box-shadow: 0 30px 70px rgba(20,35,60,.45);
+    box-shadow: 0 34px 80px rgba(8,6,26,.6);
     position: relative;
     overflow: hidden;
   }
@@ -81,7 +85,7 @@
   /* ---------- Shared ---------- */
   .icon { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; display: block; }
   .icon.filled { fill: currentColor; stroke: none; }
-  .num { direction: ltr; unicode-bidi: embed; }
+  .num { direction: ltr; unicode-bidi: isolate; }
 
   .circle-btn {
     width: 44px; height: 44px; border-radius: 50%;
@@ -111,7 +115,7 @@
   .points-pill {
     align-self: flex-start;
     display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(139,123,199,.45); color: #fff;
+    background: rgba(142,138,216,.38); color: #fff;
     font-size: 13px; font-weight: 700;
     padding: 7px 14px; border-radius: 100px;
     margin-top: -6px;
@@ -136,7 +140,7 @@
   }
   .qa .qa-icon {
     width: 44px; height: 44px; border-radius: 50%;
-    background: rgba(11,31,50,.6); color: var(--accent);
+    background: rgba(13,12,32,.65); color: var(--accent);
     display: flex; align-items: center; justify-content: center; font-size: 20px;
   }
   .qa .qa-label {
@@ -161,11 +165,11 @@
     display: flex; align-items: center; justify-content: center; font-size: 16px;
   }
   .tx-icon.round { border-radius: 50%; width: 44px; height: 44px; border: 1px solid rgba(255,255,255,.12); }
-  .tx-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .tx-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
   .tx-info .m { font-size: 14px; font-weight: 700; color: var(--text); }
   .tx-info .s { font-size: 11px; color: var(--text-2); }
   .tx-amt {
-    margin-inline-start: auto; display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 6px;
     direction: ltr; flex: none;
   }
   .tx-amt .chev { color: var(--text-2); font-size: 11px; }
@@ -231,8 +235,8 @@
 
   .msg-user {
     align-self: flex-end; /* RTL flex-end = left… we want RIGHT per screenshot → flex-start */
-    background: var(--user-bubble); color: #fff;
-    font-size: 14px; font-weight: 500; line-height: 1.6;
+    background: var(--user-bubble); color: #1C1B3A;
+    font-size: 14px; font-weight: 600; line-height: 1.6;
     padding: 12px 14px; border-radius: 18px;
     max-width: 78%;
   }
@@ -290,10 +294,43 @@
   }
   .send-btn .icon { transform: scaleX(-1); }
 
+  /* ---------- Verified identity card (محرك وضّح) ---------- */
+  .vc-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .vc-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 800; padding: 5px 11px; border-radius: 100px;
+  }
+  .vc-badge.ok { background: #DFF3EA; color: #177A55; }
+  .vc-badge.pending { background: #F6E4D9; color: #A2542E; }
+  .vc-conf { font-size: 11px; font-weight: 800; padding: 5px 10px; border-radius: 100px; }
+  .vc-conf.ok { color: #177A55; background: #DFF3EA; }
+  .vc-conf.pending { color: #A2542E; background: #F6E4D9; }
+  .vc-name { font-size: 16px; font-weight: 800; color: #1E1E1E; }
+  .vc-sub { font-size: 11.5px; color: #7A7268; margin-top: 3px; line-height: 1.6; }
+  .vc-rows {
+    display: flex; flex-direction: column; gap: 7px;
+    border-top: 1px solid #E7DFD4; padding-top: 10px;
+  }
+  .vc-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; }
+  .vc-row .k { color: #8A8177; flex: none; }
+  .vc-row .v { font-weight: 700; color: #2A2A2A; text-align: left; }
+  .vc-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #1E9E6A; margin-inline-end: 5px; }
+  .vc-explain { font-size: 13px; line-height: 1.8; }
+  .vc-how { border-top: 1px dashed #E0D7CA; padding-top: 9px; }
+  .vc-how summary { font-size: 11.5px; font-weight: 700; color: #8A8177; cursor: pointer; list-style: none; }
+  .vc-how summary::-webkit-details-marker { display: none; }
+  .vc-how summary::before { content: "▸ "; }
+  .vc-how[open] summary::before { content: "▾ "; }
+  .vc-more { font-size: 11.5px; font-weight: 700; color: #A2542E; cursor: pointer; text-decoration: underline; }
+  .vc-full { display: none; }
+  .vc-full.show { display: block; }
+  .vc-how .steps { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: #6E665C; line-height: 1.7; }
+  .vc-how .steps b { color: #2A2A2A; }
+
   /* ---------- Toast ---------- */
   .toast {
     position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(8px);
-    background: rgba(10,22,36,.92); color: #fff;
+    background: rgba(22,21,47,.94); color: #fff;
     font-size: 12.5px; font-weight: 600;
     padding: 10px 18px; border-radius: 100px;
     border: 1px solid rgba(255,255,255,.12);
@@ -447,41 +484,31 @@
   </div>
 </div>
 
+<script src="wathq-data.js"></script>
+<script src="engine.js"></script>
 <script>
-/* ---------------- Data (mirrors Models.swift) ---------------- */
+/* ---------------- Data (mirrors Models.swift) ----------------
+   العمليات كما تصل من الشبكة (الوصف الخام). التفسير لم يعد مكتوبًا
+   يدويًا: محرك وضّح يطابق الوصف مع الجدول المرجعي (wathq-data.js). */
 const HOME_TX = [
-  { m: "APPLE COM BILL",               s: "اليوم · 9:15 ص", a: "-3.69 SAR",  icon: "i-phone"  },
-  { m: "THAMAR AL-TANMIYA TRADING CO", s: "أمس · 8:30 م",   a: "-84.00 SAR", icon: "i-basket" },
-  { m: "HUNGERSTATION LLC",            s: "قبل يومين",       a: "-50.84 SAR", icon: "i-fork"   },
+  { m: "APPLE COM BILL",      s: "اليوم · 9:15 ص", a: "-3.69 SAR",  icon: "i-phone" },
+  { m: "ADDRESS CAFE TRD CO", s: "اليوم · 7:40 ص", a: "-28.00 SAR", icon: "i-cup"   },
+  { m: "AL NAHDI MEDICAL CO", s: "أمس · 6:05 م",   a: "-45.30 SAR", icon: "i-bag"   },
 ];
 
 const HISTORY_TX = [
-  { m: "APPLE COM BILL",             s: "خدمات وتطبيقات إلكترونية · اليوم · 9:15 ص", a: "-3.69 SAR",   icon: "i-phone",  sc: "apple"  },
-  { m: "شركة ثمار التنمية للتجارة", s: "نقاط بيع - مدى · أمس · 8:30 م",             a: "-84.00 SAR",  icon: "i-basket", sc: "thamar" },
-  { m: "HUNGERSTATION LLC",          s: "توصيل طعام · قبل يومين",                    a: "-50.84 SAR",  icon: "i-fork",   sc: null     },
-  { m: "NAFT SERVICES CO",           s: "محطة وقود · قبل ٣ أيام",                    a: "-120.00 SAR", icon: "i-fuel",   sc: null     },
-  { m: "ELIXIR BUN CO",              s: "قهوة مختصة · قبل ٤ أيام",                   a: "-26.00 SAR",  icon: "i-cup",    sc: null     },
+  { m: "APPLE COM BILL",               s: "خدمات وتطبيقات إلكترونية · اليوم · 9:15 ص", a: "-3.69 SAR",   icon: "i-phone"  },
+  { m: "ADDRESS CAFE TRD CO",          s: "مقهى · اليوم · 7:40 ص",                     a: "-28.00 SAR",  icon: "i-cup"    },
+  { m: "THAMAR AL-TANMIYA TRADING CO", s: "نقاط بيع - مدى · أمس · 8:30 م",             a: "-84.00 SAR",  icon: "i-basket" },
+  { m: "AL NAHDI MEDICAL CO",          s: "صيدلية · أمس · 6:05 م",                     a: "-45.30 SAR",  icon: "i-bag"    },
+  { m: "HUNGERSTATION LLC",            s: "توصيل طعام · قبل يومين",                    a: "-50.84 SAR",  icon: "i-fork"   },
+  { m: "ALDREES PETROLEUM CO",         s: "محطة وقود · قبل ٣ أيام",                    a: "-120.00 SAR", icon: "i-fuel"   },
 ];
 
-const SCENARIOS = {
-  apple: {
-    user: "وشو تاجر (آبل كوم بيل) اللي خصم مني؟",
-    assistant: "هذه عملية شراء أو تجديد اشتراك من شركة آبل، ومصنفة عندنا كخدمات وتطبيقات إلكترونية (مثل زيادة مساحة تخزين الهاتف أو اشتراك تطبيق). انخصم مبلغ 3.69 ريال اليوم الساعة 9:15 صباحاً.\nحاب تصعد الموضوع لخدمة العملاء أو تبغى ترفع اعتراض؟",
-    actions: ["تصعيد لخدمة العملاء", "اعتراض على العملية"],
-  },
-  thamar: {
-    user: "مكتوب بالعملية (شركة ثمار التنمية للتجارة) ومخصوم 84 ريال، أنا ما رحت هالشركة!",
-    assistant: "تم التأكد من العملية؛ هذا الاسم التجاري مسجل لجهاز نقاط البيع الخاص بـ سوبرماركت أسواق النخبة (فرع حي الياسمين).\nتم دفع مبلغ 84 ريال عبر بطاقتك (مدى) بمسح الجهاز مباشرة، بتاريخ أمس الساعة 8:30 مساءً.\nحاب نفتح لك خريطة موقع المحل للتأكد؟",
-    actions: ["موقع المحل على الخريطة", "تقديم اعتراض"],
-  },
-};
-
-function genericScenario(merchant) {
-  return {
-    user: "وضح لي عملية (" + merchant + ") اللي انخصمت مني؟",
-    assistant: "هذه عملية شراء من " + merchant + "، وتم تصنيفها تلقائيًا حسب نوع المتجر.\nهذي نسخة تجريبية للعرض — في التطبيق الفعلي بحلل لك العملية من بيانات حسابك مباشرة 👌",
-    actions: ["تصعيد لخدمة العملاء", "اعتراض على العملية"],
-  };
+/* سؤال العميل: نص السيناريو المحفوظ إن وجد، وإلا سؤال عام */
+function userQuestion(merchant, rawName) {
+  if (merchant && merchant.userMessage) return merchant.userMessage;
+  return "وش هذي العملية (" + rawName + ")؟ ما أعرف هالاسم!";
 }
 
 /* ---------------- Router ---------------- */
@@ -500,7 +527,7 @@ function txRowHTML(t, opts) {
   const roundIcon = opts.round ? " round" : "";
   const chev = opts.chevron ? '<svg class="icon chev"><use href="#i-chevron-l"/></svg>' : "";
   const pill = opts.pill
-    ? '<div class="pill-holder"><button class="wadhah-pill" onclick="openChat(\'' + (t.sc || "") + '\',\'' + t.m.replace(/'/g, "") + '\')">' +
+    ? '<div class="pill-holder"><button class="wadhah-pill" onclick="openChat(' + opts.idx + ')">' +
       '<span>وضح</span><img src="assets/wad-glyph.png" alt=""></button></div>'
     : "";
   return (
@@ -520,7 +547,7 @@ document.getElementById("home-tx").innerHTML =
   "</div>";
 
 document.getElementById("history-list").innerHTML =
-  HISTORY_TX.map(t => txRowHTML(t, { round: true, chevron: true, pill: true })).join("");
+  HISTORY_TX.map((t, i) => txRowHTML(t, { round: true, chevron: true, pill: true, idx: i })).join("");
 
 /* ---------------- Chat ---------------- */
 const thread = document.getElementById("chat-thread");
@@ -543,19 +570,125 @@ function bubbleAssistant(text, actions) {
   );
 }
 
-let openingReplyTimer;
-function openChat(scenarioKey, merchant) {
-  try { window.parent !== window && window.parent.postMessage({ type: 'wadhah-analyzing' }, '*'); } catch (e) {}
-  const sc = SCENARIOS[scenarioKey] || genericScenario(merchant || "المتجر");
-  clearTimeout(openingReplyTimer);
-  // Wadhah "analyzes" the transaction first: question + typing indicator,
-  // then the explanation lands after a beat.
-  thread.innerHTML =
-    bubbleUser(sc.user) +
-    '<div class="msg-row-assist" id="opening-typing">' +
-      '<div class="msg-assist"><div class="typing"><span></span><span></span><span></span></div></div>' +
-      '<div class="msg-avatar"><img src="assets/wad.png" alt=""></div>' +
+/* ---------------- بطاقة الهوية الموثقة (مخرجات المحرك) ---------------- */
+function typingRow(id) {
+  return '<div class="msg-row-assist" id="' + id + '">' +
+    '<div class="msg-assist"><div class="typing"><span></span><span></span><span></span></div></div>' +
+    '<div class="msg-avatar"><img src="assets/wad.png" alt=""></div>' +
+  "</div>";
+}
+
+function identityCard(res, tx) {
+  const m = res.merchant;
+  const verified = res.verified;
+  const badge = verified
+    ? '<span class="vc-badge ok">✓ هوية موثقة من السجل التجاري</span>'
+    : '<span class="vc-badge pending">◌ قيد التوثيق الحكومي</span>';
+  const conf = '<span class="vc-conf ' + (verified ? "ok" : "pending") + '">الثقة <span class="num">' + res.confidence + '%</span></span>';
+
+  let rows = "";
+  if (verified) {
+    rows +=
+      '<div class="vc-row"><span class="k">السجل التجاري</span><span class="v"><span class="num">' + m.crNumber + '</span></span></div>' +
+      '<div class="vc-row"><span class="k">الرقم الوطني الموحد</span><span class="v"><span class="num">' + m.crNationalNumber + '</span></span></div>' +
+      '<div class="vc-row"><span class="k">حالة السجل</span><span class="v"><span class="vc-dot"></span>' + m.status + '</span></div>';
+  } else {
+    rows +=
+      '<div class="vc-row"><span class="k">التوثيق</span><span class="v">يُستكمل من السحبة القادمة لواثق</span></div>';
+  }
+  rows +=
+    '<div class="vc-row"><span class="k">النشاط</span><span class="v">' + m.activities[0].name + '</span></div>' +
+    (m.city ? '<div class="vc-row"><span class="k">المدينة</span><span class="v">' + m.city + '</span></div>' : "") +
+    (tx ? '<div class="vc-row"><span class="k">العملية</span><span class="v"><span class="num">' + tx.a + '</span> · ' + tx.s + '</span></div>' : "");
+
+  const legalLine = m.legalName && m.legalName !== m.displayName
+    ? 'الاسم الرسمي: <bdi>' + m.legalName + '</bdi>' + (m.displayBranch ? ' · ' + m.displayBranch : "")
+    : (m.displayBranch || "");
+
+  const hasMore = m.explanation && m.explanationShort && m.explanation !== m.explanationShort;
+  const explainBlock =
+    '<div class="vc-explain">' + (m.explanationShort || m.explanation) +
+      (hasMore
+        ? ' <span class="vc-more" onclick="toggleExplain(this)">عرض التفاصيل</span>' +
+          '<span class="vc-full"> ' + m.explanation + '</span>'
+        : "") +
     "</div>";
+
+  const how =
+    '<details class="vc-how"><summary>كيف طابقنا هذا الاسم؟</summary><div class="steps">' +
+      '<div>المدخل الخام: <b><bdi class="num">' + (tx ? tx.m : res.normalizedInput) + '</bdi></b></div>' +
+      '<div>بعد التطبيع: <b>' + res.normalizedInput + '</b></div>' +
+      '<div>المرادف المطابق: <b><bdi>' + res.matchedAlias + '</bdi></b></div>' +
+      '<div>درجة التشابه: <b><span class="num">' + res.confidence + '%</span></b></div>' +
+      '<div>المصدر: <b>' + (verified ? "واثق — السجل التجاري (وزارة التجارة)" : "الجدول الأولي — بانتظار التوثيق") + '</b></div>' +
+    "</div></details>";
+
+  const actions =
+    '<div class="msg-actions">' +
+      '<button class="chat-btn primary" onclick="ackClear()">كل شيء واضح ✓</button>' +
+      '<button class="chat-btn secondary" onclick="fileDispute(\'' + m.id + '\')">تقديم اعتراض</button>' +
+    "</div>";
+
+  return (
+    '<div class="msg-row-assist">' +
+      '<div class="msg-assist">' +
+        '<div class="vc-top">' + badge + conf + "</div>" +
+        '<div><div class="vc-name">' + m.displayName + '</div><div class="vc-sub">' + legalLine + "</div></div>" +
+        '<div class="vc-rows">' + rows + "</div>" +
+        explainBlock +
+        how + actions +
+      "</div>" +
+      '<div class="msg-avatar"><img src="assets/wad.png" alt=""></div>' +
+    "</div>"
+  );
+}
+
+function toggleExplain(el) {
+  const full = el.nextElementSibling;
+  const open = full.classList.toggle("show");
+  el.textContent = open ? "إخفاء التفاصيل" : "عرض التفاصيل";
+}
+
+function noMatchBubble() {
+  return bubbleAssistant(
+    "ما قدرت أوثّق هذا الاسم من الجدول التجريبي الحالي (" + WATHQ_MERCHANTS.length + " تجار).\n" +
+    "في النسخة الكاملة، أي اسم غير معروف يُضاف تلقائيًا لقائمة التوثيق القادمة من واثق.\n" +
+    "إذا كانت عندك عملية محددة، افتحها من سجل العمليات واضغط زر (وضح).",
+    null
+  );
+}
+
+function ackClear() {
+  thread.insertAdjacentHTML("beforeend",
+    bubbleAssistant("تم إغلاق الاستفسار ✓ بدون مكالمة وبدون نزاع.", null) +
+    '<div class="msg-time">وضح · الآن</div>');
+  scrollChat();
+}
+
+function fileDispute(merchantId) {
+  const m = WATHQ_MERCHANTS.find(x => x.id === merchantId);
+  const idLine = m && m.crNumber
+    ? "هوية التاجر: <bdi>" + m.legalName + "</bdi> (س.ت <bdi class='num'>" + m.crNumber + "</bdi>) — موثقة من السجل التجاري"
+    : "هوية التاجر: <bdi>" + (m ? m.legalName : "غير محددة") + "</bdi> — قيد التوثيق";
+  thread.insertAdjacentHTML("beforeend",
+    bubbleAssistant(
+      "جهزت ملف الاعتراض وأرفقت الأدلة تلقائيًا:\n" +
+      "• " + idLine + "\n" +
+      "• تفاصيل العملية والطابع الزمني من سجل حسابك\n" +
+      "• نتيجة المطابقة ودرجة الثقة\n" +
+      "الملف جاهز للإرسال لفريق النزاعات.", null) +
+    '<div class="msg-time">وضح · الآن</div>');
+  scrollChat();
+}
+
+let openingReplyTimer;
+function openChat(idx) {
+  try { window.parent !== window && window.parent.postMessage({ type: 'wadhah-analyzing' }, '*'); } catch (e) {}
+  const tx = HISTORY_TX[idx];
+  const res = WadhahEngine.match(tx.m);
+  clearTimeout(openingReplyTimer);
+  // وضّح "يحلل" العملية أولًا: السؤال + مؤشر الكتابة، ثم البطاقة تصل بعد لحظة.
+  thread.innerHTML = bubbleUser(userQuestion(res && res.merchant, tx.m)) + typingRow("opening-typing");
   navigate("screen-chat");
   scrollChat();
 
@@ -564,7 +697,7 @@ function openChat(scenarioKey, merchant) {
     if (!typing) return;
     typing.remove();
     thread.insertAdjacentHTML("beforeend",
-      bubbleAssistant(sc.assistant, sc.actions) +
+      (res ? identityCard(res, tx) : noMatchBubble()) +
       '<div class="msg-time">وضح · الآن</div>');
     scrollChat();
   }, 1400);
@@ -593,8 +726,9 @@ function sendMessage() {
 
   setTimeout(() => {
     document.getElementById(typingId).remove();
+    const res = WadhahEngine.matchFromText(text);
     thread.insertAdjacentHTML("beforeend",
-      bubbleAssistant("استلمت سؤالك 👌 هذي نسخة تجريبية من وضّح — في التطبيق الفعلي بجاوبك من بيانات حسابك وسجل عملياتك مباشرة.", null) +
+      (res ? identityCard(res, null) : noMatchBubble()) +
       '<div class="msg-time">وضح · الآن</div>');
     scrollChat();
   }, 1100);
